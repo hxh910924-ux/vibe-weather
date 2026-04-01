@@ -47,7 +47,7 @@ function renderWeather() {
 
   const day = state.forecast.days[state.selectedIndex];
   elements.cityName.textContent = state.forecast.city.adm1
-    ? `${state.forecast.city.name} | ${state.forecast.city.adm1}`
+    ? `${state.forecast.city.name} · ${state.forecast.city.adm1}`
     : state.forecast.city.name;
   elements.temperature.textContent = String(day.temperature);
   elements.summary.textContent = day.summary;
