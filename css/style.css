@@ -80,8 +80,9 @@ body {
 .sun-icon {
     width: 18px;
     height: 18px;
-    opacity: 0.6;
+    opacity: 0.9;
     transition: opacity 0.3s ease;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
 }
 
 .sun-item:hover .sun-icon {
@@ -89,11 +90,11 @@ body {
 }
 
 .sunrise-icon {
-    color: rgba(255, 180, 120, 0.8);
+    color: rgba(255, 180, 100, 1);
 }
 
 .sunset-icon {
-    color: rgba(255, 140, 100, 0.8);
+    color: rgba(255, 140, 80, 1);
 }
 
 .date-selector {
@@ -139,43 +140,40 @@ body {
 }
 
 .theme-item {
-    width: 44px;
-    height: 44px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-radius: 12px;
+    width: 48px;
+    height: 48px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 14px;
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: rgba(255, 255, 255, 0.7);
-}
-
-.theme-item svg {
-    width: 22px;
-    height: 22px;
-    pointer-events: none;
-    color: inherit;
-}
-
-.theme-item svg * {
-    color: inherit;
-}
-
-.theme-item:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.3);
     color: rgba(255, 255, 255, 0.9);
 }
 
-.theme-item.active {
+.theme-item svg {
+    width: 26px;
+    height: 26px;
+    pointer-events: none;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+
+.theme-item:hover {
     background: rgba(255, 255, 255, 0.2);
     border-color: rgba(255, 255, 255, 0.4);
     color: rgba(255, 255, 255, 1);
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2), inset 0 0 10px rgba(255, 255, 255, 0.1);
+    transform: scale(1.05);
+}
+
+.theme-item.active {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+    color: rgba(255, 255, 255, 1);
+    box-shadow: 0 0 24px rgba(255, 255, 255, 0.25), inset 0 0 12px rgba(255, 255, 255, 0.15);
 }
 
 .loading-text {
