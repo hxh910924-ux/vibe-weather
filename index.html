@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>氛围天气</title>
+    <meta
+      name="description"
+      content="一个以沉浸式动效为核心的氛围感天气网页应用。"
+    />
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+  <body>
+    <canvas id="weather-canvas" aria-hidden="true"></canvas>
+    <div class="noise-layer" aria-hidden="true"></div>
+
+    <div class="app-shell">
+      <header class="topbar">
+        <button
+          id="city-trigger"
+          class="city-trigger glass interactive"
+          type="button"
+          aria-haspopup="dialog"
+          aria-controls="city-dialog"
+        >
+          <span class="city-label">当前城市</span>
+          <span id="city-name">定位中...</span>
+        </button>
+      </header>
+
+      <main class="hero">
+        <section class="weather-panel">
+          <p id="status-message" class="status-message">正在获取天气...</p>
+          <div class="temperature-row">
+            <span id="temperature">--</span>
+            <span class="temperature-unit">°</span>
+          </div>
+          <p id="weather-summary" class="weather-summary">正在同步天气节奏</p>
+          <div class="sunline">
+            <span id="sunrise">日出 --:--</span>
+            <span id="sunset">日落 --:--</span>
+          </div>
+        </section>
+
+        <nav class="date-selector glass" aria-label="未来七天天气">
+          <div id="date-list" class="date-list"></div>
+        </nav>
+      </main>
+
+      <nav class="theme-switcher glass" aria-label="切换天气主题">
+        <button class="theme-button interactive" data-theme="auto" type="button">
+          <span class="theme-glyph" aria-hidden="true"></span>
+          <strong>自动</strong>
+        </button>
+        <button class="theme-button interactive" data-theme="sunny" type="button">
+          <span class="theme-glyph" aria-hidden="true"></span>
+          <strong>晴天</strong>
+        </button>
+        <button class="theme-button interactive" data-theme="cloudy" type="button">
+          <span class="theme-glyph" aria-hidden="true"></span>
+          <strong>多云</strong>
+        </button>
+        <button class="theme-button interactive" data-theme="rainy" type="button">
+          <span class="theme-glyph" aria-hidden="true"></span>
+          <strong>雨天</strong>
+        </button>
+        <button class="theme-button interactive" data-theme="snowy" type="button">
+          <span class="theme-glyph" aria-hidden="true"></span>
+          <strong>雪天</strong>
+        </button>
+        <button class="theme-button interactive" data-theme="foggy" type="button">
+          <span class="theme-glyph" aria-hidden="true"></span>
+          <strong>雾天</strong>
+        </button>
+        <button class="theme-button interactive" data-theme="night" type="button">
+          <span class="theme-glyph" aria-hidden="true"></span>
+          <strong>夜间</strong>
+        </button>
+      </nav>
+    </div>
+
+    <div
+      id="city-dialog"
+      class="city-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="city-search-label"
+      hidden
+    >
+      <div id="city-backdrop" class="city-backdrop"></div>
+      <div class="city-modal glass">
+        <div class="city-search-header">
+          <label id="city-search-label" class="sr-only" for="city-input">
+            搜索城市
+          </label>
+          <input
+            id="city-input"
+            class="city-input"
+            type="search"
+            placeholder="搜索城市..."
+            autocomplete="off"
+          />
+          <button id="city-close" class="city-close interactive" type="button">
+            关闭
+          </button>
+        </div>
+
+        <section class="city-history">
+          <h2>最近</h2>
+          <div id="recent-cities" class="city-tags"></div>
+        </section>
+
+        <section class="city-results-wrap">
+          <h2>搜索结果</h2>
+          <div id="city-results" class="city-results" role="listbox"></div>
+        </section>
+      </div>
+    </div>
+
+    <script>
+      window.ATMOS_WEATHER_CONFIG = {
+        qweatherKey: "9447b0a8d848492487255b69899130c0",
+      };
+    </script>
+    <script type="module" src="./js/app.js"></script>
+  </body>
+</html>
