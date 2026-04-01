@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>氛围天气</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <canvas id="weatherCanvas"></canvas>
+
+    <main class="weather-container">
+        <header class="city-name" id="cityName">北京市</header>
+
+        <section class="temperature" id="temperature">23°</section>
+
+        <section class="weather-desc" id="weatherDesc">小雨 · 东南风3级</section>
+
+        <section class="sun-info">
+            <span class="sun-item">
+                <svg class="sun-icon sunrise-icon" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.5"/>
+                    <line x1="12" y1="3" x2="12" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <line x1="12" y1="18" x2="12" y2="21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <line x1="3" y1="12" x2="6" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <line x1="18" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <span id="sunrise">06:12</span>
+            </span>
+            <span class="sun-item">
+                <svg class="sun-icon sunset-icon" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 10C14.2 10 16 8.2 16 6H8C8 8.2 9.8 10 12 10Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <line x1="12" y1="14" x2="12" y2="17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <line x1="8" y1="14" x2="8" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <line x1="16" y1="14" x2="16" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <span id="sunset">18:35</span>
+            </span>
+        </section>
+
+        <section class="date-selector" id="dateSelector">
+            <button class="date-item active" data-index="0">今天</button>
+            <button class="date-item" data-index="1">明天</button>
+            <button class="date-item" data-index="2">后天</button>
+            <button class="date-item" data-index="3">周四</button>
+            <button class="date-item" data-index="4">周五</button>
+            <button class="date-item" data-index="5">周六</button>
+            <button class="date-item" data-index="6">周日</button>
+        </section>
+
+        <section class="theme-selector">
+            <button class="theme-item active" data-theme="sunny" title="晴天">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                    <circle cx="12" cy="12" r="5"/>
+                    <line x1="12" y1="4" x2="12" y2="1"/>
+                    <line x1="12" y1="23" x2="12" y2="20"/>
+                    <line x1="4" y1="12" x2="1" y2="12"/>
+                    <line x1="23" y1="12" x2="20" y2="12"/>
+                    <line x1="6.34" y1="6.34" x2="4.46" y2="4.46"/>
+                    <line x1="19.54" y1="19.54" x2="17.66" y2="17.66"/>
+                    <line x1="6.34" y1="17.66" x2="4.46" y2="19.54"/>
+                    <line x1="19.54" y1="4.46" x2="17.66" y2="6.34"/>
+                </svg>
+            </button>
+            <button class="theme-item" data-theme="cloudy" title="多云">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="9" cy="10" r="4"/>
+                    <circle cx="15" cy="9" r="5"/>
+                </svg>
+            </button>
+            <button class="theme-item" data-theme="rainy" title="雨天">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                    <circle cx="10" cy="8" r="4"/>
+                    <circle cx="16" cy="7" r="5"/>
+                    <line x1="7" y1="16" x2="7" y2="20"/>
+                    <line x1="12" y1="16" x2="12" y2="20"/>
+                    <line x1="17" y1="16" x2="17" y2="20"/>
+                </svg>
+            </button>
+            <button class="theme-item" data-theme="snowy" title="雪天">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                    <circle cx="10" cy="8" r="4"/>
+                    <circle cx="16" cy="7" r="5"/>
+                    <line x1="7" y1="16" x2="7" y2="20"/>
+                    <line x1="12" y1="16" x2="12" y2="20"/>
+                    <line x1="17" y1="16" x2="17" y2="20"/>
+                    <line x1="8" y1="18" x2="6" y2="20"/>
+                    <line x1="16" y1="18" x2="18" y2="20"/>
+                </svg>
+            </button>
+            <button class="theme-item" data-theme="foggy" title="雾天">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                    <line x1="5" y1="9" x2="19" y2="9"/>
+                    <line x1="7" y1="12" x2="17" y2="12"/>
+                    <line x1="5" y1="15" x2="19" y2="15"/>
+                </svg>
+            </button>
+            <button class="theme-item" data-theme="night" title="夜间">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+            </button>
+        </section>
+    </main>
+
+    <div class="loading-text" id="loadingText">正在获取天气...</div>
+
+    <div class="error-text" id="errorText" style="display: none;">天气数据暂时获取不到</div>
+
+    <div class="search-modal" id="searchModal">
+        <div class="search-box">
+            <input type="text" class="search-input" id="searchInput" placeholder="搜索城市...">
+            <div class="recent-cities" id="recentCities"></div>
+            <div class="search-results" id="searchResults"></div>
+        </div>
+    </div>
+
+    <script src="js/utils/storage.js"></script>
+    <script src="js/utils/geo.js"></script>
+    <script src="js/effects/sunny.js"></script>
+    <script src="js/effects/cloudy.js"></script>
+    <script src="js/effects/rainy.js"></script>
+    <script src="js/effects/snowy.js"></script>
+    <script src="js/effects/foggy.js"></script>
+    <script src="js/effects/night.js"></script>
+    <script src="js/effects/index.js"></script>
+    <script src="js/weather.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
