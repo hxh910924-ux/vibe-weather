@@ -1,5 +1,6 @@
 :root {
   color-scheme: dark;
+  --page-fallback: #d9b27d;
   --text-primary: rgba(255, 255, 255, 0.94);
   --text-secondary: rgba(255, 255, 255, 0.72);
   --text-muted: rgba(255, 255, 255, 0.58);
@@ -32,7 +33,7 @@ body {
 body {
   position: relative;
   min-height: 100dvh;
-  background-color: #d9b27d;
+  background-color: var(--page-fallback);
 }
 
 button,

@@ -35,6 +35,17 @@ const elements = {
 };
 
 const manager = new EffectManager(document.querySelector("#weather-canvas"));
+const themeColorMeta = document.querySelector("#theme-color-meta");
+
+const THEME_CHROME = {
+  auto: "#d9b27d",
+  sunny: "#e3bb86",
+  cloudy: "#778da1",
+  rainy: "#33475a",
+  snowy: "#93a9c3",
+  foggy: "#7d858d",
+  night: "#101b31",
+};
 
 function setStatus(message) {
   elements.status.textContent = message;
@@ -131,6 +142,7 @@ function syncTheme() {
     button.classList.toggle("active", button.dataset.theme === state.theme);
   });
   manager.switchTo(activeTheme);
+  syncChromeColor(activeTheme);
 }
 
 function getActiveTheme() {
@@ -152,6 +164,15 @@ function themeLabel(theme) {
     night: "\u591c\u95f4",
   };
   return labels[theme] || theme;
+}
+
+function syncChromeColor(theme) {
+  const color = THEME_CHROME[theme] || THEME_CHROME.auto;
+  document.documentElement.style.setProperty("--page-fallback", color);
+  document.body.style.backgroundColor = color;
+  if (themeColorMeta) {
+    themeColorMeta.setAttribute("content", color);
+  }
 }
 
 async function handleCityChange(city) {
