@@ -185,8 +185,12 @@ async function handleCityChange(city) {
     saveRecentCity(forecast.city);
     renderRecentCities();
     renderWeather();
-  } catch {
-    setStatus("\u5929\u6c14\u6570\u636e\u6682\u65f6\u65e0\u6cd5\u83b7\u53d6");
+  } catch (error) {
+    setStatus(
+      error instanceof Error
+        ? `\u5929\u6c14\u63a5\u53e3\u5f02\u5e38\uff1a${error.message}`
+        : "\u5929\u6c14\u6570\u636e\u6682\u65f6\u65e0\u6cd5\u83b7\u53d6",
+    );
   }
 }
 

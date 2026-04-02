@@ -89,6 +89,44 @@ function getApiKey() {
   return window.ATMOS_WEATHER_CONFIG?.qweatherKey || "";
 }
 
+function getApiHost() {
+  const host = (window.ATMOS_WEATHER_CONFIG?.qweatherHost || "").trim();
+  return host.replace(/^https?:\/\//, "").replace(/\/+$/, "");
+}
+
+function hasRealtimeApiConfig() {
+  return Boolean(getApiKey() && getApiHost());
+}
+
+function buildApiUrl(path, params = {}) {
+  const host = getApiHost();
+  const key = getApiKey();
+  if (!host || !key) {
+    throw new Error("未配置和风天气 API Host 或 API Key");
+  }
+
+  const url = new URL(`https://${host}${path}`);
+  Object.entries({ ...params, key }).forEach(([name, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      url.searchParams.set(name, String(value));
+    }
+  });
+  return url.toString();
+}
+
+async function requestJson(path, params) {
+  const response = await withTimeout(buildApiUrl(path, params));
+  if (!response.ok) {
+    throw new Error(`天气服务请求失败（HTTP ${response.status}）`);
+  }
+
+  const json = await response.json();
+  if (json.code && json.code !== "200") {
+    throw new Error(`天气服务返回错误（code ${json.code}）`);
+  }
+  return json;
+}
+
 function buildSummary(day) {
   const precipLabel =
     Number(day.precip) > 0
@@ -123,14 +161,11 @@ function normalizeLocation(raw) {
 }
 
 async function searchCitiesFromApi(keyword) {
-  const key = getApiKey();
-  const url = `https://geoapi.qweather.com/v2/city/lookup?location=${encodeURIComponent(keyword)}&key=${encodeURIComponent(key)}`;
-  const response = await withTimeout(url);
-  if (!response.ok) {
-    throw new Error("City search failed");
-  }
-
-  const json = await response.json();
+  const json = await requestJson("/geo/v2/city/lookup", {
+    location: keyword,
+    lang: "zh",
+    range: "cn",
+  });
   return (json.location || []).map((item) => ({
     id: item.id,
     name: item.name,
@@ -228,33 +263,36 @@ function createMockForecast(city) {
 }
 
 async function fetchForecastFromApi(cityId) {
-  const key = getApiKey();
-  const url = `https://devapi.qweather.com/v7/weather/7d?location=${encodeURIComponent(cityId)}&key=${encodeURIComponent(key)}`;
-  const response = await withTimeout(url);
-  if (!response.ok) {
-    throw new Error("Weather fetch failed");
-  }
-  return response.json();
+  const [daily, now] = await Promise.all([
+    requestJson("/v7/weather/7d", {
+      location: cityId,
+      lang: "zh",
+      unit: "m",
+    }),
+    requestJson("/v7/weather/now", {
+      location: cityId,
+      lang: "zh",
+      unit: "m",
+    }),
+  ]);
+
+  return { daily, now };
 }
 
 async function reverseLookupCity(lat, lon) {
-  const key = getApiKey();
-  if (!key) {
+  if (!hasRealtimeApiConfig()) {
     return getDefaultCity();
   }
 
-  const url = `https://geoapi.qweather.com/v2/city/lookup?location=${lon},${lat}&key=${encodeURIComponent(key)}`;
-  const response = await withTimeout(url);
-  if (!response.ok) {
-    throw new Error("Reverse lookup failed");
-  }
-
-  const json = await response.json();
+  const json = await requestJson("/geo/v2/city/lookup", {
+    location: `${lon},${lat}`,
+    lang: "zh",
+  });
   return normalizeLocation(json.location?.[0] || getDefaultCity());
 }
 
 export async function searchCities(keyword) {
-  if (getApiKey()) {
+  if (hasRealtimeApiConfig()) {
     try {
       return await searchCitiesFromApi(keyword);
     } catch {
@@ -273,39 +311,66 @@ export async function resolveCurrentCity(position) {
 }
 
 export async function getForecast(city) {
-  if (!getApiKey()) {
+  if (!hasRealtimeApiConfig()) {
     return normalizeForecast(createMockForecast(city));
   }
 
-  try {
-    const json = await fetchForecastFromApi(city.id);
-    return normalizeForecast({ city, daily: json.daily || [] });
-  } catch {
-    return normalizeForecast(createMockForecast(city));
-  }
+  const json = await fetchForecastFromApi(city.id);
+  return normalizeForecast({
+    city,
+    daily: json.daily?.daily || [],
+    now: json.now?.now || null,
+  });
 }
 
 function normalizeForecast(payload) {
   const city = normalizeLocation(payload.city);
+  const now = payload.now;
   const days = payload.daily.slice(0, 7).map((day, index) => ({
     date: day.fxDate,
     label: getDateLabel(day.fxDate, index),
     weekday: getWeekday(day.fxDate),
-    temperature: Math.round((Number(day.tempMax) + Number(day.tempMin)) / 2),
+    temperature:
+      index === 0 && now?.temp
+        ? Number(now.temp)
+        : Math.round((Number(day.tempMax) + Number(day.tempMin)) / 2),
     temperatureRange: `${day.tempMin}\u00b0 / ${day.tempMax}\u00b0`,
-    summary: buildSummary(day),
+    summary:
+      index === 0 && now
+        ? buildNowSummary(now)
+        : buildSummary(day),
     sunrise: day.sunrise,
     sunset: day.sunset,
-    wind: `${day.windDirDay}${day.windScaleDay}`,
-    precip: day.precip,
-    weatherText: day.textDay,
-    effect: mapWeatherToTheme(day, index),
+    wind:
+      index === 0 && now
+        ? `${now.windDir}${now.windScale}级`
+        : `${day.windDirDay}${day.windScaleDay}`,
+    precip: index === 0 && now ? now.precip : day.precip,
+    weatherText: index === 0 && now?.text ? now.text : day.textDay,
+    effect:
+      index === 0 && now?.text
+        ? mapWeatherToTheme(
+            {
+              ...day,
+              textDay: now.text,
+            },
+            index,
+          )
+        : mapWeatherToTheme(day, index),
   }));
 
   return {
     city,
     days,
   };
+}
+
+function buildNowSummary(now) {
+  const precipLabel =
+    Number(now.precip) > 0
+      ? `${now.text} · 近1小时降水 ${now.precip} mm`
+      : `${now.text} · 无明显降水`;
+  return `${precipLabel} · ${now.windDir}${now.windScale}级`;
 }
 
 function getDateLabel(dateText, index) {
