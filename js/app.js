@@ -14,6 +14,8 @@ const state = {
   forecast: null,
   selectedIndex: 0,
   theme: getThemePreference(),
+  todaySunrise: null,
+  todaySunset: null,
 };
 
 const elements = {
@@ -57,6 +59,11 @@ function renderWeather() {
   }
 
   const day = state.forecast.days[state.selectedIndex];
+  const today = state.forecast.days[0];
+  if (today) {
+    state.todaySunrise = today.sunrise;
+    state.todaySunset = today.sunset;
+  }
   elements.cityName.textContent = state.forecast.city.adm1
     ? `${state.forecast.city.name} · ${state.forecast.city.adm1}`
     : state.forecast.city.name;
@@ -145,12 +152,35 @@ function syncTheme() {
   syncChromeColor(activeTheme);
 }
 
+function isCurrentlyNight() {
+  if (!state.todaySunrise || !state.todaySunset) {
+    return false;
+  }
+  const now = new Date();
+  const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
+  const currentTotalMinutes = currentHour * 60 + currentMinute;
+
+  const [sunriseHour, sunriseMinute] = state.todaySunrise.split(":").map(Number);
+  const [sunsetHour, sunsetMinute] = state.todaySunset.split(":").map(Number);
+  const sunriseTotalMinutes = sunriseHour * 60 + sunriseMinute;
+  const sunsetTotalMinutes = sunsetHour * 60 + sunsetMinute;
+
+  return currentTotalMinutes < sunriseTotalMinutes || currentTotalMinutes >= sunsetTotalMinutes;
+}
+
 function getActiveTheme() {
   const day = state.forecast?.days[state.selectedIndex];
   if (!day) {
     return "sunny";
   }
-  return state.theme === "auto" ? day.effect : state.theme;
+  if (state.theme === "auto") {
+    if (isCurrentlyNight()) {
+      return "night";
+    }
+    return day.effect || "sunny";
+  }
+  return state.theme;
 }
 
 function themeLabel(theme) {
@@ -233,6 +263,8 @@ function bindEvents() {
   });
 }
 
+let nightCheckInterval = null;
+
 async function bootstrap() {
   bindEvents();
   renderRecentCities();
@@ -242,6 +274,7 @@ async function bootstrap() {
   if (historyCity) {
     await handleCityChange(historyCity);
     setStatus("\u5df2\u6062\u590d\u4e0a\u6b21\u6d4f\u89c8\u7684\u57ce\u5e02");
+    startNightModeChecker();
     return;
   }
 
@@ -256,6 +289,18 @@ async function bootstrap() {
     await handleCityChange(getDefaultCity());
     setStatus("\u65e0\u6cd5\u83b7\u53d6\u4f4d\u7f6e\uff0c\u5df2\u5207\u6362\u4e3a\u5317\u4eac");
   }
+  startNightModeChecker();
+}
+
+function startNightModeChecker() {
+  if (nightCheckInterval) {
+    clearInterval(nightCheckInterval);
+  }
+  nightCheckInterval = setInterval(() => {
+    if (state.theme === "auto" && state.forecast) {
+      syncTheme();
+    }
+  }, 60000);
 }
 
 void bootstrap();
