@@ -180,7 +180,8 @@ button {
 }
 
 .date-selector {
-  width: min(92vw, 720px);
+  width: 100%;
+  max-width: 720px;
   border-radius: 24px;
   padding: 12px;
 }
